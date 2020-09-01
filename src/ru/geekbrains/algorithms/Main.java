@@ -1,48 +1,67 @@
 package ru.geekbrains.algorithms;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 public class Main {
 
-	private int result;
-
-	public Main () {
-		result = 3;
-	}
-
-	int getResult () {
-		return result;
-	}
-
-
 	public static void main(String[] args) {
-	/*
-	* Задание 1
-	* Пример из жизни: телефонный справочник.
-	* Данные хранятся строго по алфавиту (чаще всего),
-	* а чтобы найти нужный номер надо воспользовоться известным алгоритмом.
-	* */
 
-	/*
-	* Задание 2
-	* Пример из программирования: хранение информации по игре "крестики-нолики".
-	* Это обычная таблица, двумерный массив с крестиками, ноликами или
-	* пока не поставленным символом (например пробел, чтобы не был null).
-	* А вот алгоритм - это отдельный разговор. Можно, конечно, обойтись перебором,
-	* но если игровое поле 100х100, а для победы надо поставить 5 крестиков или
-	* ноликов в ряд, то перебор отпадёт.
-	* */
+		double time;
+		Integer[] arr = {5, 2, 7, 5, 3, 9, 6, 1, 9, 1};
 
-    Integer a = 1; // Ссылочный тип данных
-	int b = 2; // Примитивный тип данных
-	Main c = new Main(); //	Тип данных, содержащий свой класс
-	int d = 3;
-	System.out.println(a);
-	System.out.println(b);
-	System.out.println(c.getResult());
+		time = System.nanoTime();
+		ArrayList<Integer> arrList = new ArrayList<>(Arrays.asList(arr));
+		System.out.println(arrList);
+		System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
-	System.out.println(a == d);
-	System.out.println(b == d);
-	System.out.println(c.getResult() == d);
+		time = System.nanoTime();
+		arrList.add(10);
+		arrList.remove(1);
+		System.out.println(arrList.get(0));
+		System.out.println(arrList);
+		System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
-	System.out.println((double) System.nanoTime() / 1_000_000_000);
+		LinkedList<Integer> copyList = new LinkedList<>(arrList);
+		time = System.nanoTime();
+		copyList.add(8);
+		copyList.remove(1);
+		System.out.println(copyList.get(0));
+		System.out.println(copyList);
+		System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
+		ArrayList<ArrObj> objList = new ArrayList<>();
+		objList.add(new ArrObj(7, 6));
+		objList.add(new ArrObj(1, 5));
+		objList.add(new ArrObj(8, 2));
+		System.out.println(objList);
+
+		Iterator<Integer> iter = copyList.iterator();
+		time = System.nanoTime();
+		while (iter.hasNext()) {
+			System.out.print(iter.next() + " ");
+			iter.remove();
+		}
+		System.out.println("\n" + (System.nanoTime() - time) / 1_000_000_000 + "\n");
+
+	}
+
+}
+
+class ArrObj {
+
+	int a;
+	int b;
+
+	ArrObj (int a, int b) {
+		this.a = a;
+		this.b = b;
+	}
+
+	@Override
+	public String toString() {
+		return "a: " + a + " b: " + b;
 	}
 }
+
