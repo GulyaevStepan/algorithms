@@ -1,49 +1,62 @@
 package ru.geekbrains.algorithms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 public class Main {
 
 	public static void main(String[] args) {
 
 		double time;
-		Integer[] arr = {5, 2, 7, 5, 3, 9, 6, 1, 9, 1};
+		
+		LinkedList<ArrObj> objList = new LinkedList<>();
+        objList.add(new ArrObj(1, 1));
+        objList.add(new ArrObj(2, 2));
+        objList.add(new ArrObj(3, 3));
+
+        time = System.nanoTime();
+		StackM<ArrObj> objStack = new StackM<>(objList);
+        for (int i = 4; i < 8; i++) {
+            objStack.push(new ArrObj(i, i));
+        }
+		System.out.println(objStack.peek());
+		while (!objStack.isEmpty()) {
+		    System.out.println(objStack.pop());
+        }
+        System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
 		time = System.nanoTime();
-		ArrayList<Integer> arrList = new ArrayList<>(Arrays.asList(arr));
-		System.out.println(arrList);
-		System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
+        QueueM<ArrObj> objQueue = new QueueM<>(objList);
+        for (int i = 1; i < 8; i++) {
+            objQueue.insert(new ArrObj(i, i));
+        }
+        System.out.println(objQueue.peek());
+        while (!objQueue.isEmpty()) {
+            System.out.println(objQueue.remove());
+        }
+        System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
-		time = System.nanoTime();
-		arrList.add(10);
-		arrList.remove(1);
-		System.out.println(arrList.get(0));
-		System.out.println(arrList);
-		System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
+        time = System.nanoTime();
+        DequeM<ArrObj> objDeque = new DequeM<>(objList);
+        for (int i = 1; i < 8; i++) {
+            objDeque.addLast(new ArrObj(i, i));
+        }
+        System.out.println(objDeque.peekLast());
+        while (!objDeque.isEmpty()) {
+            System.out.println(objDeque.pollLast());
+        }
+        System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
-		LinkedList<Integer> copyList = new LinkedList<>(arrList);
-		time = System.nanoTime();
-		copyList.add(8);
-		copyList.remove(1);
-		System.out.println(copyList.get(0));
-		System.out.println(copyList);
-		System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
-		ArrayList<ArrObj> objList = new ArrayList<>();
-		objList.add(new ArrObj(7, 6));
-		objList.add(new ArrObj(1, 5));
-		objList.add(new ArrObj(8, 2));
-		System.out.println(objList);
-
-		Iterator<Integer> iter = copyList.iterator();
-		time = System.nanoTime();
-		while (iter.hasNext()) {
-			System.out.print(iter.next() + " ");
-			iter.remove();
-		}
-		System.out.println("\n" + (System.nanoTime() - time) / 1_000_000_000 + "\n");
+        time = System.nanoTime();
+        PriorityQueue<Integer> priorQueue = new PriorityQueue<>();
+        Random rand = new Random();
+        for (int i = 1; i < 8; i++) {
+            priorQueue.add(rand.nextInt(10));
+        }
+        System.out.println(priorQueue.peek());
+        while (!priorQueue.isEmpty()) {
+            System.out.println(priorQueue.poll());
+        }
+        System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
 	}
 
@@ -65,3 +78,110 @@ class ArrObj {
 	}
 }
 
+class StackM<T> {
+
+    LinkedList<T> stack;
+
+    StackM () {
+        stack = new LinkedList<>();
+    }
+
+    StackM (LinkedList<T> stack) {
+        this.stack = stack;
+    }
+
+    void push (T Obj) {
+        stack.add(Obj);
+    }
+
+    T pop () {
+        T result = stack.getLast();
+        stack.remove(stack.size() - 1);
+        return result;
+    }
+
+    T peek () {
+        return stack.getLast();
+    }
+
+    boolean isEmpty () {
+        return stack.size() == 0;
+    }
+
+}
+
+class QueueM<T> {
+
+    LinkedList<T> queue;
+
+    QueueM() {
+        queue = new LinkedList<>();
+    }
+
+    QueueM(LinkedList<T> queue) {
+        this.queue = queue;
+    }
+
+    void insert(T Obj) {
+        queue.add(Obj);
+    }
+
+    T remove() {
+        T result = queue.getFirst();
+        queue.removeFirst();
+        return result;
+    }
+
+    T peek() {
+        return queue.getFirst();
+    }
+
+    boolean isEmpty() {
+        return queue.size() == 0;
+    }
+}
+
+class DequeM<T> {
+
+    LinkedList<T> deque;
+
+    DequeM() {
+        deque = new LinkedList<>();
+    }
+
+    DequeM(LinkedList<T> deque) {
+        this.deque = deque;
+    }
+
+    void addFirst(T Obj) {
+        deque.addFirst(Obj);
+    }
+
+    void addLast(T Obj) {
+        deque.addLast(Obj);
+    }
+
+    T pollFirst() {
+        T result = deque.getFirst();
+        deque.removeFirst();
+        return result;
+    }
+
+    T pollLast() {
+        T result = deque.getLast();
+        deque.removeLast();
+        return result;
+    }
+
+    T peekFirst() {
+        return deque.getFirst();
+    }
+
+    T peekLast() {
+        return deque.getLast();
+    }
+
+    boolean isEmpty() {
+        return deque.size() == 0;
+    }
+}
