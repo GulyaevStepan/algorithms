@@ -14,23 +14,27 @@ public class Main {
         * */
 
         double time;
-        Tree tree = new Tree();
-        tree.insert(new Person(2, "Bill", 20));
-        tree.insert(new Person(4, "Bob", 31));
-        tree.insert(new Person(7, "Steev", 19));
-        tree.insert(new Person(1, "Mike", 55));
-        tree.insert(new Person(5, "Anna", 29));
-        tree.insert(new Person(6, "Julia", 42));
-        tree.find(1).display();
+        Graph graph = new Graph();
+        graph.addVertex('A');
+        graph.addVertex('B');
+        graph.addVertex('C');
+        graph.addVertex('D');
+        graph.addVertex('E');
+        graph.addVertex('F');
+
+        graph.addEdge(0, 1);
+        graph.addEdge(0, 2);
+        graph.addEdge(1, 2);
+        graph.addEdge(1, 3);
+        graph.addEdge(3, 4);
+        graph.addEdge(4, 5);
+
         time = System.nanoTime();
-        tree.displayTree();
+        graph.bfa();
         System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
         time = System.nanoTime();
-        int[] arr = {4, 3, 8, 6, 9, 0, 3, 1, 2, 7, 7};
-        HeapSort heap = new HeapSort();
-        heap.sort(arr);
-        System.out.println(Arrays.toString(arr));
+        graph.dfa();
         System.out.println((System.nanoTime() - time) / 1_000_000_000 + "\n");
 
 
@@ -39,297 +43,94 @@ public class Main {
 
 }
 
-class Person {
+class Vertex {
 
-    private String name;
-    private int age;
-    private int id;
+    public char label;
+    public boolean wasVisited;
 
-    public Person (int id, String name, int age) {
-        this.name = name;
-        this.age = age;
-        this.id = id;
-    }
-
-    @Override
-    public String toString() {
-        return "id: " + id +  ", name: " + name + ", age: " + age;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public String getName() {
-        return name;
+    public Vertex (char label) {
+        this.label = label;
+        this.wasVisited = false;
     }
 }
 
-class Node {
+class Graph {
 
-    private Person person;
-    private Node left;
-    private Node right;
+    private final int MAX = 32;
+    private Vertex[] vertexList;
+    private int[][] adjMat;
+    private int size;
+    private Stack stack;
 
-    public void display() {
-        System.out.println(person.toString());
+    public Graph() {
+        stack = new Stack();
+        vertexList = new Vertex[MAX];
+        adjMat = new int[MAX][MAX];
+        size = 0;
+        for (int i = 0; i < MAX; i++) {
+            for (int j = 0; j < MAX; j++) {
+                adjMat[i][j] = 0;
+            }
+        }
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void addVertex(char label) {
+        vertexList[size++] = new Vertex(label);
     }
 
-    public Person getPerson() {
-        return person;
+    public void addEdge(int start, int end) {
+        adjMat[start][end] = 1;
+        adjMat[end][start] = 1;
     }
 
-    public Node getLeft() {
-        return left;
+    public void displayVertex(int vertex) {
+        System.out.println(vertexList[vertex].label);
     }
 
-    public Node getRight() {
-        return right;
+    public int getAdjUnvisitedVertex(int ver) {
+        for (int i = 0; i < size; i++) {
+            if (adjMat[ver][i] == 1 && vertexList[i].wasVisited == false) {
+                return i;
+            }
+        }
+        return -1;
     }
 
-    public void setLeft(Node left) {
-        this.left = left;
+    public void bfa() {
+        Queue<Integer> queue = new LinkedList<>();
+        vertexList[0].wasVisited = true;
+        displayVertex(0);
+        queue.add(0);
+        int v2;
+        while (!queue.isEmpty()){
+            int v1 = queue.remove();
+            while ((v2 = getAdjUnvisitedVertex(v1)) != -1) {
+                vertexList[v2].wasVisited = true;
+                displayVertex(v2);
+                queue.add(v2);
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            vertexList[i].wasVisited = false;
+        }
     }
 
-    public void setRight(Node right) {
-        this.right = right;
+    public void dfa() {
+        vertexList[0].wasVisited = true;
+        displayVertex(0);
+        stack.push(0);
+        while (!stack.isEmpty()){
+            int v = getAdjUnvisitedVertex((Integer) stack.peek());
+            if (v == -1) {
+                stack.pop();
+            } else {
+                vertexList[v].wasVisited = true;
+                displayVertex(v);
+                stack.push(v);
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            vertexList[i].wasVisited = false;
+        }
     }
 }
-
-class Tree {
-
-    private Node root;
-
-    public void insert(Person person) {
-        Node node = new Node();
-        node.setPerson(person);
-        if (root == null) {
-            root = node;
-        } else {
-            Node current = root;
-            Node parent;
-            while (true) {
-                parent = current;
-                if (person.getId() < current.getPerson().getId()) {
-                    current = current.getLeft();
-                    if (current == null) {
-                        parent.setLeft(node);
-                        return;
-                    }
-                } else {
-                    current = current.getRight();
-                    if (current == null) {
-                        parent.setRight(node);
-                        return;
-                    }
-                }
-
-            }
-        }
-    }
-
-    public Node find(int key) {
-        Node current = root;
-        while (current.getPerson().getId() != key) {
-            if (key < current.getPerson().getId()) {
-                current = current.getLeft();
-            } else {
-                current =current.getRight();
-            }
-            if (current == null) {
-                return null;
-            }
-        }
-        return current;
-    }
-
-    private void preOrder(Node rootNode) {
-        if (rootNode != null) {
-            rootNode.display();
-            preOrder(rootNode.getLeft());
-            preOrder(rootNode.getRight());
-        }
-    }
-
-    private void postOrder(Node rootNode) {
-        if (rootNode != null) {
-            postOrder(rootNode.getLeft());
-            postOrder(rootNode.getRight());
-            rootNode.display();
-        }
-    }
-
-    private void inOrder(Node rootNode) {
-        if (rootNode != null) {
-            inOrder(rootNode.getLeft());
-            rootNode.display();
-            inOrder(rootNode.getRight());
-        }
-    }
-
-    public Node min() {
-        Node current = root;
-        Node last = null;
-        while (current != null) {
-            last = current;
-            current = current.getLeft();
-        }
-        return last;
-    }
-
-    public Node max() {
-        Node current = root;
-        Node last = null;
-        while (current != null) {
-            last = current;
-            current = current.getRight();
-        }
-        return last;
-    }
-
-    public boolean delete(int id) {
-        Node current = root;
-        Node parent = root;
-
-        boolean isLeft = true;
-
-        while (current.getPerson().getId() != id) {
-            parent = current;
-            if (id < current.getPerson().getId()) {
-                isLeft = true;
-                current = current.getLeft();
-            } else {
-                isLeft = false;
-                current = current.getRight();
-            }
-            if (current == null) {
-                return false;
-            }
-        }
-
-        if (current.getLeft() == null && current.getRight() == null) {
-            if (current == root) {
-                root = null;
-            } else if (isLeft) {
-                parent.setLeft(null);
-            } else {
-                parent.setRight(null);
-            }
-        } else if (current.getRight() == null) {
-            if (current == null) {
-                root = current.getLeft();
-            } else if (isLeft) {
-                parent.setLeft(current.getLeft());
-            } else {
-                parent.setRight(current.getLeft());
-            }
-        } else if (current.getLeft() == null) {
-            if (current == null) {
-                root = current.getRight();
-            } else if (isLeft) {
-                parent.setLeft(current.getRight());
-            } else {
-                parent.setRight(current.getRight());
-            }
-        } else {
-            Node successor = getSuccessor(current);
-            if (current == root) {
-                root = successor;
-            } else if (isLeft) {
-                parent.setLeft(successor);
-            } else {
-                parent.setRight(successor);
-            }
-            successor.setLeft(current.getLeft());
-        }
-        return true;
-    }
-
-    public Node getSuccessor(Node node) {
-        Node successorParent = node;
-        Node successor = node;
-        Node current = node.getRight();
-
-        while (current != null) {
-            successorParent = successor;
-            successor = current;
-            current = current.getLeft();
-        }
-        if (successor != node.getRight()) {
-            successorParent.setLeft(successor.getRight());
-            successor.setRight(node.getRight());
-        }
-
-        return successor;
-    }
-
-    public void displayTree() {
-        Node current = root;
-        System.out.println("Симметричный");
-        inOrder(current);
-        System.out.println("Прямой");
-        preOrder(current);
-        System.out.println("Обратный");
-        postOrder(current);
-    }
-}
-
-class HeapSort {
-
-    private static int heapSize;
-
-    public static void sort(int[] a) {
-        buildHeap(a);
-        while (heapSize > 1) {
-            swap(a, 0, heapSize - 1);
-            heapSize--;
-            heapify(a, 0);
-        }
-    }
-
-    private static void buildHeap(int[] a) {
-        heapSize = a.length;
-        for (int i = a.length / 2; i >= 0; i--) {
-            heapify(a, i);
-        }
-    }
-
-    private static void heapify(int[] a, int i) {
-        int l = left(i);
-        int r = right(i);
-        int largest = i;
-        if (l < heapSize && a[i] < a[l]) {
-            largest = l;
-        }
-        if (r < heapSize && a[largest] < a[r]) {
-            largest = r;
-        }
-        if (i != largest) {
-            swap(a, i, largest);
-            heapify(a, largest);
-        }
-    }
-
-    private static void swap(int[] a, int i, int j) {
-        int temp = a[i];
-        a[i] = a[j];
-        a[j] = temp;
-    }
-
-    private static int left(int i) {
-        return 2 * i + 1;
-    }
-
-    private static int right(int i) {
-        return 2 * i + 2;
-    }
-}
-
